@@ -6,16 +6,30 @@ package gps_application.evismar.tutorials.com.servicesample;
 
 public class LocationData {
 
-    public double longitude;
     public double latitude;
+    public double longitude;
 
-    public LocationData() {
-
+    public double getLatitude() {
+        return latitude;
     }
 
-    public LocationData(double lati,double longi) {
-        longitude = longi;
-        latitude = lati;
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude){
+        this.longitude = longitude;
+    }
+
+    public void setLatitude(double latitude){
+        this.latitude = latitude;
+    }
+
+    LocationData(double latitude, double longitude){
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+    public LocationData() {
     }
 
 
