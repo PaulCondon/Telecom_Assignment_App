@@ -1,0 +1,99 @@
+{
+  "project_info": {
+    "project_number": "706870773964",
+    "firebase_url": "https://gps-app-5b697.firebaseio.com",
+    "project_id": "gps-app-5b697",
+    "storage_bucket": "gps-app-5b697.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:706870773964:android:61242aaccffa6cce",
+        "android_client_info": {
+          "package_name": "gps_application.evismar.tutorials.com.gps_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "706870773964-dj70e3eapa6s5l6i05dprl3mu3hhca8h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "gps_application.evismar.tutorials.com.gps_app",
+            "certificate_hash": "9b4fe314ab38844ec573993e5f4d642e5bd238f6"
+          }
+        },
+        {
+          "client_id": "706870773964-095bee9lihm1ppep8d51lip78an9onbu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnKOssxDP4W-xkNvIJ9mTXTr5N-zGqPeM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "706870773964-095bee9lihm1ppep8d51lip78an9onbu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:706870773964:android:53e028ef916cf405",
+        "android_client_info": {
+          "package_name": "gps_application.evismar.tutorials.com.servicesample"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "706870773964-c1gdu0isovgpsqi3mbjg77nqp1d2hf3r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "gps_application.evismar.tutorials.com.servicesample",
+            "certificate_hash": "9b4fe314ab38844ec573993e5f4d642e5bd238f6"
+          }
+        },
+        {
+          "client_id": "706870773964-095bee9lihm1ppep8d51lip78an9onbu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnKOssxDP4W-xkNvIJ9mTXTr5N-zGqPeM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "706870773964-095bee9lihm1ppep8d51lip78an9onbu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
