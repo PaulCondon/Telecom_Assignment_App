@@ -8,10 +8,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
@@ -34,8 +36,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,LocationListener {
 
     private GoogleMap mMap;
     private ProgressDialog LocationDialog;
@@ -43,27 +46,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference  mDatabase = database.getReference();
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
-
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-        startService(new Intent(this, GPSService.class));
-        setUpMapIfNeeded();
-
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-        checkLocationPermission();
-        startGettingLocations();
-
-        mDatabase.child("Locations").addValueEventListener(locationListener);
-    }
 
     @Override
     protected void onResume() {
@@ -111,30 +93,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     private void setUpMap() {
         final DatabaseReference ref = mDatabase.child("locations").getRef();
-        ValueEventListener locationListener = new ValueEventListener() {
-        // Attach a listener to read the data at our posts reference
-//        ref.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot locSnapshot : dataSnapshot.getChildren()) {
-                    LocationData loc = locSnapshot.getValue(LocationData.class);
-                    //System.out.println(post);
-                    if (loc != null) {
-                        // App 2: Todo: Add a map marker here based on the loc downloaded
 
-                        mMap.addMarker(new MarkerOptions()
-                                .position(new LatLng(loc.latitude, loc.longitude))
-                                .title("Hello!"));
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                System.out.println("The read failed: " + databaseError.getCode());
-            }
-//        });
-        };
+//        // Attach a listener to read the data at our posts reference
+////        ref.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                for (DataSnapshot locSnapshot : dataSnapshot.getChildren()) {
+//                    LocationData loc = locSnapshot.getValue(LocationData.class);
+//                    //System.out.println(post);
+//                    if (loc != null) {
+//                        // App 2: Todo: Add a map marker here based on the loc downloaded
+//
+//                        mMap.addMarker(new MarkerOptions()
+//                                .position(new LatLng(loc.latitude, loc.longitude))
+//                                .title("Hello!"));
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//                System.out.println("The read failed: " + databaseError.getCode());
+//            }
 
         CameraUpdate center =
                 CameraUpdateFactory.newLatLng(new LatLng(53.283912, -9.063874));
@@ -163,23 +143,68 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         toast.show();
     }
 */
-@Override
-protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_maps);
-    // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-    SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-            .findFragmentById(R.id.map);
-    mapFragment.getMapAsync(this);
-    checkLocationPermission();
-    startGettingLocations();
+ValueEventListener locationListener = new ValueEventListener() {
+    @Override
+    public void onDataChange(DataSnapshot dataSnapshot) {
+        // Get Post object and use the values to update the UI
 
-    mDatabase.child("Locations").addValueEventListener(locationListener);
+        for (DataSnapshot locationSnapshot: dataSnapshot.getChildren()) {
+            LocationData location = locationSnapshot.getValue(LocationData.class);
+//
+            String x = locationSnapshot.getKey();
 
-    //mDatabase.addValueEventListener(locationListener);
+//                String eventName = event.child(Constants.taEventName).getValue(String.class);
+//                String eventAddress = event.child(Constants.taEventAddress).getValue(String.class);
 
 
-}
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(Long.parseLong(x));
+
+            int mYear = calendar.get(Calendar.YEAR);
+            int mMonth = calendar.get(Calendar.MONTH);
+            int mDay = calendar.get(Calendar.DAY_OF_MONTH);
+            int mHour = calendar.get(Calendar.HOUR);
+            int mMin = calendar.get(Calendar.MINUTE);
+            int mSecond = calendar.get(Calendar.SECOND);
+
+            String date = mDay + "/" + mMonth + "/" + mYear + " " + mHour +":"+mMin+":"+mSecond;
+
+
+            LatLng latLng = new LatLng(location.getLatitude(),location.getLongitude());
+            //mMap.addMarker(new MarkerOptions().position(latLng).title(latLng.toString()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+
+            mMap.addMarker(new MarkerOptions().position(latLng).title(date).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+        }
+
+    }
+    @Override
+    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+    }
+};
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_maps);
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        startService(new Intent(this, GPSService.class));
+        setUpMapIfNeeded();
+
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_maps);
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+        checkLocationPermission();
+        startGettingLocations();
+
+        mDatabase.child("Locations").addValueEventListener(locationListener);
+    }
+
+
     public boolean checkLocationPermission() {
         if (ContextCompat.checkSelfPermission(this,
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
