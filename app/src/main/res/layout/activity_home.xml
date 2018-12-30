@@ -21,7 +21,7 @@ tools:context=".Home">
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="45dp"
+            android:textSize="35dp"
             android:text="Devices Map"/>
     </LinearLayout>
 
@@ -39,7 +39,7 @@ tools:context=".Home">
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="45dp"
+            android:textSize="35dp"
             android:text="Devices List"/>
     </LinearLayout>
 </LinearLayout>
