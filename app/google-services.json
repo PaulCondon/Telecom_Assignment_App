@@ -59,6 +59,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "130281806634-vbqrpnldi7o39aalmd3l8rjlp6au4ar9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "gps_application.evismar.tutorials.com.servicesample",
+            "certificate_hash": "0f35d205f5d43015dca4861f1a520853671764fe"
+          }
+        },
+        {
           "client_id": "130281806634-38obn4b2s7j17bem1klh3pttkn2eobhi.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
