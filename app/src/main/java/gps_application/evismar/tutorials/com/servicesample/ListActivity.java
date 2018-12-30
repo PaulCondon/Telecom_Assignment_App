@@ -26,6 +26,7 @@ public class ListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        colin_list_page
         setContentView(R.layout.activity_list);
 
         database = FirebaseDatabase.getInstance();
