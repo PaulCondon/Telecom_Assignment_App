@@ -1,6 +1,5 @@
 package gps_application.evismar.tutorials.com.servicesample;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -59,7 +58,7 @@ public class ListActivity extends AppCompatActivity {
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
+                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -71,7 +70,7 @@ public class ListActivity extends AppCompatActivity {
 
             @Override
             public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
+                adapter.notifyDataSetChanged();
             }
 
             @Override
