@@ -1,15 +1,34 @@
 package gps_application.evismar.tutorials.com.servicesample;
 
+import android.Manifest;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.ContextCompat;
+import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -17,7 +36,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+import java.util.ArrayList;
+import java.util.Date;
+
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
+
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private DatabaseReference mDatabase;
@@ -28,13 +51,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
-        startService(new Intent(this, GPSService.class));
+        startService(new Intent(this, BluetoothGPSService.class));
         setUpMapIfNeeded();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        setUpMapIfNeeded();
     }
 
     /**
@@ -52,6 +76,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * stopped or paused), {@link #onCreate(Bundle)} may not be called again so we should call this
      * method in {@link #onResume()} to guarantee that it will be called.
      */
+
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
@@ -76,8 +101,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * <p/>
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
+
     private void setUpMap() {
-        final DatabaseReference ref = mDatabase.child("locations").getRef();
+        final DatabaseReference ref = mDatabase.child("Locations").getRef();
 
         // Attach a listener to read the data at our posts reference
         ref.addValueEventListener(new ValueEventListener() {
@@ -91,9 +117,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                         mMap.addMarker(new MarkerOptions()
                                 .position(new LatLng(loc.latitude, loc.longitude))
-                                .title("Hello!"));
+                                .title("No. Bluetooth Devices: "+loc.getNumBluetoothDevices()));
                     }
                 }
+                ref.removeEventListener(this);
             }
 
             @Override
@@ -111,25 +138,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.animateCamera(zoom);
     }
 
-/*
-    public void button1click(View v) {
-        Context context = getApplicationContext();
-        CharSequence text = "Hello toast 1!";
-        int duration = Toast.LENGTH_SHORT;
 
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
+    @Override
+    public void onLocationChanged(Location location) {
+
     }
 
-    public void button2click(View v) {
-        Context context = getApplicationContext();
-        CharSequence text = "Hello toast 2!";
-        int duration = Toast.LENGTH_SHORT;
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
 
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
     }
-*/
 
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
 
 }
+
+
