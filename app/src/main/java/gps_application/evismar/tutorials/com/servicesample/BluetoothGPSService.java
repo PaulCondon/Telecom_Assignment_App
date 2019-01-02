@@ -132,9 +132,18 @@ public class BluetoothGPSService extends Service implements LocationListener {
     };
 
     public void onLocationChanged(Location location) {
-
+        int numDevices;
+        if(devicesInCurrLocation == null){
+            numDevices = 0;
+        }
+        else if (devicesInCurrLocation.isEmpty()){
+            numDevices = 0;
+        }
+        else {
+            numDevices = devicesInCurrLocation.size();
+        }
         //App 2  todo: upload location to Firebase
-        LocationData locationData = new LocationData(location.getLatitude(),location.getLongitude(),devicesInCurrLocation);
+        LocationData locationData = new LocationData(location.getLatitude(),location.getLongitude(), numDevices);
 
         dbRef.child("Locations").push().setValue(locationData);
         Toast.makeText(BluetoothGPSService.this,
