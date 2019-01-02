@@ -91,7 +91,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                         mMap.addMarker(new MarkerOptions()
                                 .position(new LatLng(loc.latitude, loc.longitude))
-                                .title("Hello!"));
+                                .title(locSnapshot.getKey()));
                     }
                 }
             }
