@@ -4,7 +4,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.google.firebase.database.ChildEventListener;
@@ -22,19 +24,29 @@ public class ListActivity extends AppCompatActivity {
     private DatabaseReference dbRef;
     private ArrayList<String> deviceList;
     private ArrayAdapter<String> adapter;
+    private Button returnButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        colin_list_page
         setContentView(R.layout.activity_list);
 
         database = FirebaseDatabase.getInstance();
-        dbRef = database.getReference();
+        dbRef = database.getReference().child("Devices");
 
+        deviceList = new ArrayList<>();
         listView = (ListView) findViewById(R.id.dbListView);
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, deviceList);
-        deviceList = new ArrayList<String>();
+        listView.setAdapter(adapter);
+
+        returnButton = findViewById(R.id.buttonDevicesListReturn);
+
+        returnButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         dbRef.addChildEventListener(new ChildEventListener() {
             @Override
@@ -46,17 +58,19 @@ public class ListActivity extends AppCompatActivity {
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
+                adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
+                String device = dataSnapshot.getValue(String.class);
+                deviceList.remove(device);
+                adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
+                adapter.notifyDataSetChanged();
             }
 
             @Override
