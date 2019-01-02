@@ -68,7 +68,7 @@ public class GPSService extends Service implements android.location.LocationList
 
         //App 2  todo: upload location to Firebase
         LocationData obj = new LocationData(arg0.getLatitude(),arg0.getLongitude());
-        mDatabase.child("locations").push().setValue(obj);
+        mDatabase.child("Locations").push().setValue(obj);
         Log.e(TAG, "Location logged: " + obj.latitude + " " + obj.longitude);
     }
 
