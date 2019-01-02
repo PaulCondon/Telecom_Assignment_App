@@ -132,7 +132,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         CameraUpdate center =
                 CameraUpdateFactory.newLatLng(new LatLng(53.283912, -9.063874));
-        CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
+        CameraUpdate zoom = CameraUpdateFactory.zoomTo(6);
 
         mMap.moveCamera(center);
         mMap.animateCamera(zoom);
