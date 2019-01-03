@@ -16,6 +16,7 @@ import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -44,6 +45,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private DatabaseReference mDatabase;
+    private double lastLocationLat;
+    private double lastLocationLong;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,10 +108,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void setUpMap() {
         final DatabaseReference ref = mDatabase.child("Locations").getRef();
 
+
         // Attach a listener to read the data at our posts reference
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                long max = 0;
                 for (DataSnapshot locSnapshot : dataSnapshot.getChildren()) {
                     LocationData loc = locSnapshot.getValue(LocationData.class);
                     if (loc != null) {
@@ -117,8 +122,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         mMap.addMarker(new MarkerOptions()
                                 .position(new LatLng(loc.latitude, loc.longitude))
                                 .title("No. Bluetooth Devices: "+loc.getNumBluetoothDevices()));
+
+
+                        long recordedTime  = Long.parseLong(locSnapshot.getKey());
+                        if (recordedTime > max)
+                        {
+                            max = recordedTime;
+                            lastLocationLat = loc.latitude;
+                            lastLocationLong = loc.longitude;
+                            Log.i("MyTag", "onDataChange:" + lastLocationLat +", "+ lastLocationLong);
+                        }
+
+
                     }
                 }
+                Log.i("MyTag", "camera:" + lastLocationLat +", "+ lastLocationLong);
+
+                CameraUpdate center =
+                        CameraUpdateFactory.newLatLng(new LatLng(lastLocationLat,lastLocationLong));
+                CameraUpdate zoom = CameraUpdateFactory.zoomTo(8);
+                mMap.moveCamera(center);
+                mMap.animateCamera(zoom);
                 ref.removeEventListener(this);
             }
 
@@ -127,16 +151,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 System.out.println("The read failed: " + databaseError.getCode());
             }
         });
-
-
-        CameraUpdate center =
-                CameraUpdateFactory.newLatLng(new LatLng(53.2860972,-9.1352877));
-        CameraUpdate zoom = CameraUpdateFactory.zoomTo(6);
-
-        mMap.moveCamera(center);
-        mMap.animateCamera(zoom);
     }
-
 
     @Override
     public void onLocationChanged(Location location) {
