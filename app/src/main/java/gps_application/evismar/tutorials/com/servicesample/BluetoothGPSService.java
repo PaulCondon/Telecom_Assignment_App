@@ -163,7 +163,7 @@ public class BluetoothGPSService extends Service implements LocationListener {
                     if (device != null){
                         device = device.replaceAll("\\[", "").replaceAll("\\]","");
                         list.add(device);
-                        Log.e(TAG, "Known Device: " + device);
+                        //Log.e(TAG, "Known Device: " + device);
 
                     }
                 }
@@ -215,17 +215,17 @@ public class BluetoothGPSService extends Service implements LocationListener {
                 }
                 for (String item: getKnownDevices()) {
                     deviceList.add(item);
-                    if (item == deviceName) {
+                    if (deviceName.contentEquals(item)) {
                         newDevice = false;
-
+                        Log.e(TAG, "Device "+ item+" is not new");
                     }
-                    Log.e(TAG, "FALSE TRIGGERED "+"---"+ item+"---");
+
                 }
                 //if new add it to list and database
                 if (newDevice) {
                     deviceList.add(deviceName);
                     dbRef.child("Devices").child(deviceAddress).setValue(deviceName);
-                    Log.e(TAG, "New Bluetooth device detected: " +"---"+ deviceName+"---");
+                    Log.e(TAG, "New Bluetooth device detected: "+ deviceName);
                 }
             }
         }
