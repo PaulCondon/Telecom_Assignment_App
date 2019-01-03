@@ -111,7 +111,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot locSnapshot : dataSnapshot.getChildren()) {
                     LocationData loc = locSnapshot.getValue(LocationData.class);
-                    //System.out.println(post);
                     if (loc != null) {
                         // App 2: Todo: Add a map marker here based on the loc downloaded
 
@@ -131,7 +130,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         CameraUpdate center =
-                CameraUpdateFactory.newLatLng(new LatLng(53.283912, -9.063874));
+                CameraUpdateFactory.newLatLng(new LatLng(53.2860972,-9.1352877));
         CameraUpdate zoom = CameraUpdateFactory.zoomTo(6);
 
         mMap.moveCamera(center);
