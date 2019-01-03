@@ -1,14 +1,11 @@
 package gps_application.evismar.tutorials.com.servicesample;
 
-
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
-
 import android.os.Bundle;
-
 import android.support.v4.app.FragmentActivity;
-
+import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -23,12 +20,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private DatabaseReference mDatabase;
+    private double lastLocationLat;
+    private double lastLocationLong;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,20 +88,41 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void setUpMap() {
         final DatabaseReference ref = mDatabase.child("Locations").getRef();
 
+
         // Attach a listener to read the data at our posts reference
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                long max = 0;
                 for (DataSnapshot locSnapshot : dataSnapshot.getChildren()) {
                     LocationData loc = locSnapshot.getValue(LocationData.class);
                     if (loc != null) {
                         // App 2: Todo: Add a map marker here based on the loc downloaded
 
                         mMap.addMarker(new MarkerOptions()
-                                .position(new LatLng(loc.getLatitude(), loc.getLongitude()))
+                                .position(new LatLng(loc.latitude, loc.longitude))
                                 .title("No. Bluetooth Devices: "+loc.getNumBluetoothDevices()));
+
+
+                        long recordedTime  = Long.parseLong(locSnapshot.getKey());
+                        if (recordedTime > max)
+                        {
+                            max = recordedTime;
+                            lastLocationLat = loc.latitude;
+                            lastLocationLong = loc.longitude;
+                            Log.i("MyTag", "onDataChange:" + lastLocationLat +", "+ lastLocationLong);
+                        }
+
+
                     }
                 }
+                Log.i("MyTag", "camera:" + lastLocationLat +", "+ lastLocationLong);
+
+                CameraUpdate center =
+                        CameraUpdateFactory.newLatLng(new LatLng(lastLocationLat,lastLocationLong));
+                CameraUpdate zoom = CameraUpdateFactory.zoomTo(8);
+                mMap.moveCamera(center);
+                mMap.animateCamera(zoom);
                 ref.removeEventListener(this);
             }
 
@@ -112,16 +131,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 System.out.println("The read failed: " + databaseError.getCode());
             }
         });
-
-
-        CameraUpdate center =
-                CameraUpdateFactory.newLatLng(new LatLng(53.2860972,-9.1352877));
-        CameraUpdate zoom = CameraUpdateFactory.zoomTo(6);
-
-        mMap.moveCamera(center);
-        mMap.animateCamera(zoom);
     }
-
 
     @Override
     public void onLocationChanged(Location location) {
