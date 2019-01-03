@@ -15,14 +15,14 @@ public class LocationData {
     public LocationData() {
 
     }
-
+    // latitude, longitude, number of bluetooth devices
     public LocationData(double lati, double longi, int BTDs) {
         this.longitude = longi;
         this.latitude = lati;
         this.numBluetoothDevices = BTDs;
     }
 
-
+    //getters
     public double getLatitude() {
         return latitude;
     }
@@ -33,5 +33,6 @@ public class LocationData {
 
     public int getNumBluetoothDevices() { return numBluetoothDevices; }
 
+    //setter
     public void setNumBluetoothDevices(int newNumber){this.numBluetoothDevices = newNumber;}
 }

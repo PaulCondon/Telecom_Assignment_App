@@ -30,7 +30,7 @@ public class ListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
-
+        //set up Firebase reference
         database = FirebaseDatabase.getInstance();
         dbRef = database.getReference().child("Devices");
 
@@ -51,25 +51,33 @@ public class ListActivity extends AppCompatActivity {
         dbRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                //get new device
                 String device = dataSnapshot.getValue(String.class);
+                //add new device to list
                 deviceList.add(device);
+                //tell adapter
                 adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                //tell adapter
                 adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                //get removed device
                 String device = dataSnapshot.getValue(String.class);
+                //remove device from list
                 deviceList.remove(device);
+                //tell adapter
                 adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                //tell adapter
                 adapter.notifyDataSetChanged();
             }
 
