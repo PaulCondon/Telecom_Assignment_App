@@ -19,6 +19,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -33,6 +34,7 @@ import java.util.Date;
 
 public class BluetoothGPSService extends Service implements LocationListener {
 
+    private static final String TAG = "BluetoothGPSService";
     private LocationManager locationManager;
     private BluetoothAdapter bluetoothAdapter;
     private FirebaseDatabase database;
@@ -41,10 +43,13 @@ public class BluetoothGPSService extends Service implements LocationListener {
     private ArrayList<String> deviceList;
     private ArrayList<String> devicesInCurrLocation;
     private Handler handler;
-    private boolean GPS_on = false;
-    private boolean network_on = false;
-    private boolean GPS_running = false;
-    private boolean network_running =false;
+    private int numDevices;
+    private LocationData newLocation;
+    private boolean GPSEnabled;
+    private boolean GPSAvailable;
+    private boolean networkEnabled;
+    private boolean networkAvailable;
+    private ArrayList<String> list = new ArrayList<>();
 
     public BluetoothGPSService(){ }
 
@@ -57,16 +62,19 @@ public class BluetoothGPSService extends Service implements LocationListener {
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     public void onCreate() {
-
+        numDevices = 0;
+        newLocation = new LocationData(0, 0, 0);
         database = FirebaseDatabase.getInstance();
         deviceList = new ArrayList<>();
         devicesInCurrLocation = new ArrayList<>();
-        getKnownDevices();
         dbRef = database.getReference();
+        list = new ArrayList<>();
+        getKnownDevices();
+
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        try{
+        try {
             locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, fifteenMinutes,
-                    10000, this);
+                    1, this);
         }
         catch (SecurityException e) {
             e.getMessage();
@@ -74,7 +82,6 @@ public class BluetoothGPSService extends Service implements LocationListener {
         catch (Exception e) {
             e.getMessage();
         }
-
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         filter.addAction(bluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         registerReceiver(receiver, filter);
@@ -84,10 +91,7 @@ public class BluetoothGPSService extends Service implements LocationListener {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivity(enableBtIntent);
         }
-
-        Toast.makeText(BluetoothGPSService.this,"Bluetooth & GPS Service Started",
-                Toast.LENGTH_SHORT).show();
-
+        Log.e(TAG, "Bluetooth & GPS Service Started");
         handler = new Handler();
         delayPeriod.run();
     }
@@ -101,6 +105,8 @@ public class BluetoothGPSService extends Service implements LocationListener {
             finally {
                 handler.postDelayed(delayPeriod, fifteenMinutes);
                 checkUseGPSorNetwork();
+                bluetoothScan();
+                newLocation(newLocation);
             }
         }
     };
@@ -111,113 +117,120 @@ public class BluetoothGPSService extends Service implements LocationListener {
                 PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this,
                         android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
-                        PackageManager.PERMISSION_GRANTED){
+                        PackageManager.PERMISSION_GRANTED)                          
+        {
+            //Get status of GPS and Network services
             try{
-                GPS_on = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            }
-            catch(Exception e){}
+                GPSEnabled =locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);}catch(Exception ex){}
             try{
-                network_on = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-            }
-            catch(Exception e){}
+                networkEnabled =locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);}catch(Exception ex){}
 
-            if(GPS_on && !GPS_running){
-                locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, fifteenMinutes,
-                        5000, this);
-                GPS_running = true;
-                network_running = false;
+            //If GPS now enabled and was unavailable then use it
+            if (GPSEnabled && !GPSAvailable){
+                locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER,fifteenMinutes ,1,this);   //Start using GPS - update every 10 mins
+                GPSAvailable = true;
+                networkAvailable = false;
             }
-            else {
-                locationManager.requestLocationUpdates(locationManager.NETWORK_PROVIDER, fifteenMinutes,
-                        5000, this);
-                GPS_running = false;
-                network_running = true;
+            //Otherwise If Network now enabled and was unavailable then use it
+            else if (networkEnabled && !networkAvailable){
+                locationManager.requestLocationUpdates(locationManager.NETWORK_PROVIDER,fifteenMinutes ,1,this); //Start using GPS - update every 10 mins
+                networkAvailable = true;
+                GPSAvailable = false;
+            }
+            else{
+                Toast.makeText(this, "Permission not granted!", Toast.LENGTH_SHORT);
             }
         }
     }
 
-    private void getKnownDevices() {
-        final DatabaseReference tempRef = database.getReference().child("Devices");
-        tempRef.addValueEventListener(new ValueEventListener() {
+    public void newLocation(LocationData location) {
+        location.setNumBluetoothDevices(numDevices);
+        String time = String.valueOf(new Date().getTime());
+        dbRef.child("Locations").child(time).setValue(location);
+        Log.e(TAG, "Location recorded");
+        devicesInCurrLocation.clear();
+
+    }
+
+    private ArrayList<String> getKnownDevices() {
+
+        dbRef.child("Devices").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                list.clear();
                 for (DataSnapshot reference : dataSnapshot.getChildren()) {             //Loop over all unique device entries in the database
                     String device = reference.getValue().toString();
                     if (device != null){
                         device = device.replaceAll("\\[", "").replaceAll("\\]","");
-                        deviceList.add(device);
+                        list.add(device);
+                        Log.e(TAG, "Known Device: " + device);
+
                     }
                 }
-                tempRef.removeEventListener(this);
+                dbRef.child("Devices").removeEventListener(this);
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });
+        return list;
     }
 
-    public void onLocationChanged(Location location) {
+    private void bluetoothScan() {
+        numDevices = 0;
+        if(bluetoothAdapter.isDiscovering()){
+            bluetoothAdapter.cancelDiscovery();
+        }
         bluetoothAdapter.startDiscovery();
-        while (bluetoothAdapter.isDiscovering()){Toast.makeText(BluetoothGPSService.this,
-                "Scanning for devices", Toast.LENGTH_LONG).show();}
-        Toast.makeText(BluetoothGPSService.this,
-                "Finished scanning for devices", Toast.LENGTH_LONG).show();
-        int numDevices;
+        Log.e(TAG, "Started scanning for bluetooth devices");
+        while (bluetoothAdapter.isDiscovering()){
+            Log.e(TAG, "Scanning for bluetooth devices");
+        }
+        Log.e(TAG, "Finished scanning for bluetooth devices");
+
         if(!devicesInCurrLocation.isEmpty()){
             numDevices = devicesInCurrLocation.size();
-            Toast.makeText(BluetoothGPSService.this,
-                    "" + numDevices + " device(s) nearby", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "" + numDevices + " device(s) nearby");
         }
         else {
-            numDevices = 0;
-            Toast.makeText(BluetoothGPSService.this,
-                    "No devices nearby", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "No nearby bluetooth devices");
         }
-        LocationData locationData = new LocationData(location.getLatitude(),location.getLongitude(), numDevices);
-        devicesInCurrLocation.clear();
-        String time = String.valueOf(new Date().getTime());
-        dbRef.child("Locations").child(time).setValue(locationData);
-        Toast.makeText(BluetoothGPSService.this,
-                "Location recorded", Toast.LENGTH_SHORT).show();
     }
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (BluetoothDevice.ACTION_FOUND.equals(intent.getAction())) {
-
-                Toast.makeText(BluetoothGPSService.this,
-                        "Bluetooth device nearby", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Bluetooth device nearby");
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 String deviceName = device.getName();
                 String deviceAddress = device.getAddress();
                 devicesInCurrLocation.add(deviceName);
 
-                //check to see if device is new
+
                 boolean newDevice = true;
-                for (String devName : deviceList) {
-                    if (deviceName.equals(devName)) {
+                if(getKnownDevices().isEmpty()){
+                    Log.e(TAG, "EMPTY METHOD");
+                }
+                for (String item: getKnownDevices()) {
+                    deviceList.add(item);
+                    if (item == deviceName) {
                         newDevice = false;
+
                     }
+                    Log.e(TAG, "FALSE TRIGGERED "+"---"+ item+"---");
                 }
                 //if new add it to list and database
                 if (newDevice) {
                     deviceList.add(deviceName);
                     dbRef.child("Devices").child(deviceAddress).setValue(deviceName);
-                    Toast.makeText(BluetoothGPSService.this,
-                            "New Bluetooth device detected.", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "New Bluetooth device detected: " +"---"+ deviceName+"---");
                 }
             }
         }
     };
 
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {}
-    @Override
-    public void onProviderEnabled(String provider) {}
-    @Override
-    public void onProviderDisabled(String provider) {}
 
     @Override
     public void onDestroy() {
@@ -226,5 +239,25 @@ public class BluetoothGPSService extends Service implements LocationListener {
         // Unregister the ACTION_FOUND receiver.
         unregisterReceiver(receiver);
         handler.removeCallbacks(delayPeriod);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        newLocation = new LocationData(location.getLatitude(), location.getLongitude(), 0);
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
     }
 }

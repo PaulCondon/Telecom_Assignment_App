@@ -32,4 +32,6 @@ public class LocationData {
     }
 
     public int getNumBluetoothDevices() { return numBluetoothDevices; }
+
+    public void setNumBluetoothDevices(int newNumber){this.numBluetoothDevices = newNumber;}
 }
