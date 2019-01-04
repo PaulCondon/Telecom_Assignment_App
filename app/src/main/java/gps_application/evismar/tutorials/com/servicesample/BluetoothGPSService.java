@@ -40,7 +40,7 @@ public class BluetoothGPSService extends Service implements LocationListener {
     private FirebaseDatabase database;
     private DatabaseReference dbRef;
     private LocationData newLocation;
-    private int fifteenMinutes = 900000;
+    private int fifteenMinutes = 9000;
     private int numDevices;
     private ArrayList<String> deviceList;
     private ArrayList<String> devicesInCurrLocation;
@@ -75,8 +75,8 @@ public class BluetoothGPSService extends Service implements LocationListener {
         //set up location updates
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         try {
-            locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, fifteenMinutes,
-                    1, this);
+            locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 1000,
+                    0, this);
         }
         catch (SecurityException e) {
             e.getMessage();
@@ -139,14 +139,14 @@ public class BluetoothGPSService extends Service implements LocationListener {
             //If GPS now enabled and was unavailable then use it
             if (GPSEnabled && !GPSAvailable){
                 locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, fifteenMinutes,
-                        1,this);
+                        0,this);
                 GPSAvailable = true;
                 networkAvailable = false;
             }
             //Otherwise If Network now enabled and was unavailable then use it
             else if (networkEnabled && !networkAvailable){
                 locationManager.requestLocationUpdates(locationManager.NETWORK_PROVIDER,
-                        fifteenMinutes ,1,this);
+                        fifteenMinutes ,0,this);
                 GPSAvailable = false;
             }
             //Not granted permission by user and cannot continue
@@ -171,35 +171,7 @@ public class BluetoothGPSService extends Service implements LocationListener {
                 Toast.LENGTH_LONG);
     }
 
-    //pulls down all known devices from database
-    private ArrayList<String> getKnownDevices() {
-        //database reference
-        dbRef.child("Devices").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                //empty list
-                list.clear();
-                //loop through all values
-                for (DataSnapshot reference : dataSnapshot.getChildren()) {
-                    String device = dataSnapshot.getValue().toString();
-                    // add to list if value isn't null
-                    if (device != null){
-                        device = device.replaceAll("\\[", "").replaceAll("\\]","");
-                        list.add(device);
-                        //Log.e(TAG, "Known Device: " + device);
-                    }
-                }
-                //release event listener
-                dbRef.child("Devices").removeEventListener(this);
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        });
-        //return the list of devices from database
-        return list;
-    }
 
     private void bluetoothScan() {
         //set numDevices to default
@@ -260,6 +232,34 @@ public class BluetoothGPSService extends Service implements LocationListener {
         }
     };
 
+    //pulls down all known devices from database
+    private ArrayList<String> getKnownDevices() {
+        //database reference
+        dbRef.child("Devices").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                //empty list
+                list.clear();
+                //loop through all values
+                for (DataSnapshot reference : dataSnapshot.getChildren()) {
+                    String device = reference.getValue(String.class);
+                    // add to list if value isn't null
+                    if (device != null){
+                        list.add(device);
+                        //Log.e(TAG, "Known Device: " + device);
+                    }
+                }
+                //release event listener
+                dbRef.child("Devices").removeEventListener(this);
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        //return the list of devices from database
+        return list;
+    }
 
     @Override
     public void onDestroy() {
