@@ -9,7 +9,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageButton;
 
 public class Home extends AppCompatActivity {
 
@@ -20,8 +20,8 @@ public class Home extends AppCompatActivity {
         checkLocationPermission();
         Intent bluetooth = new Intent(this, BluetoothGPSService.class);
         startService(bluetooth);
-        Button devicesMapButton = findViewById(R.id.buttonDevicesMap);
-        Button devicesListButton = findViewById(R.id.buttonDevicesList);
+        ImageButton devicesMapButton = findViewById(R.id.buttonDevicesMap);
+        ImageButton devicesListButton = findViewById(R.id.buttonDevicesList);
 
 
 

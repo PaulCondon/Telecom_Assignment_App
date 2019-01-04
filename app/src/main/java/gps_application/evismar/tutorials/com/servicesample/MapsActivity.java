@@ -22,8 +22,7 @@ import com.google.firebase.database.ValueEventListener;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
-
-    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+    private GoogleMap mMap;
     private DatabaseReference mDatabase;
     private double lastLocationLat;
     private double lastLocationLong;
@@ -32,7 +31,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-
+        //set up Firebase reference
         mDatabase = FirebaseDatabase.getInstance().getReference();
         startService(new Intent(this, BluetoothGPSService.class));
         setUpMapIfNeeded();
@@ -87,37 +86,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void setUpMap() {
         final DatabaseReference ref = mDatabase.child("Locations").getRef();
-
-
         // Attach a listener to read the data at our posts reference
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 long max = 0;
+                //read from database
                 for (DataSnapshot locSnapshot : dataSnapshot.getChildren()) {
+                    //get location from database
                     LocationData loc = locSnapshot.getValue(LocationData.class);
                     if (loc != null) {
-                        // App 2: Todo: Add a map marker here based on the loc downloaded
-
+                        //add marker to the map
                         mMap.addMarker(new MarkerOptions()
                                 .position(new LatLng(loc.latitude, loc.longitude))
+                                //give marker a title of the number of devices at that location
                                 .title("No. Bluetooth Devices: "+loc.getNumBluetoothDevices()));
-
-
+                        //get the most recent location coordinates
                         long recordedTime  = Long.parseLong(locSnapshot.getKey());
-                        if (recordedTime > max)
-                        {
+                        if (recordedTime > max) {
                             max = recordedTime;
                             lastLocationLat = loc.latitude;
                             lastLocationLong = loc.longitude;
-                            Log.i("MyTag", "onDataChange:" + lastLocationLat +", "+ lastLocationLong);
+                            Log.i("MyTag", "onDataChange:" + lastLocationLat +
+                                    ", "+ lastLocationLong);
                         }
-
-
                     }
                 }
                 Log.i("MyTag", "camera:" + lastLocationLat +", "+ lastLocationLong);
-
+                //center the map on the most recent marker
                 CameraUpdate center =
                         CameraUpdateFactory.newLatLng(new LatLng(lastLocationLat,lastLocationLong));
                 CameraUpdate zoom = CameraUpdateFactory.zoomTo(8);

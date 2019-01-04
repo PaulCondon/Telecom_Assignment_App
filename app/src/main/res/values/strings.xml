@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">Service Sample</string>
-    <string name="title_activity_maps">Map</string>
-    <string name="title_activity_list">ListActivity</string>
+    <string name="app_name">Location and Bluetooth Recorder</string>
+    <string name="title_activity_home">Menu</string>
+    <string name="title_activity_maps">Recorder Locations Map</string>
+    <string name="title_activity_list">Recorded Bluetooth Devices</string>
 </resources>
