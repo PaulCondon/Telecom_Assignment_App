@@ -214,12 +214,17 @@ public class BluetoothGPSService extends Service implements LocationListener {
                 boolean newDevice = true;
                 //set deviceList = to devices in database
                 for (String item: getKnownDevices()) {
-                    deviceList.add(item);
-                    //if deviceName is already in the list it will trigger newDevice
-                    // to switch to false
-                    if (deviceName.contentEquals(item)) {
-                        newDevice = false;
-                        Log.e(TAG, "Device "+ item+" is not new");
+                    if(item != null) {
+                        deviceList.add(item);
+                        //if deviceName is already in the list it will trigger newDevice
+                        // to switch to false
+                        if (deviceName.contentEquals(item)) {
+                            newDevice = false;
+                            Log.e(TAG, "Device " + item + " is not new");
+                        }
+                    }
+                    else {
+                        Log.e(TAG, "Error B reading Device: " + item );
                     }
 
                 }
@@ -247,6 +252,9 @@ public class BluetoothGPSService extends Service implements LocationListener {
                     if (device != null){
                         list.add(device);
                         //Log.e(TAG, "Known Device: " + device);
+                    }
+                    else {
+                        Log.e(TAG, "Error A reading Device: " + device );
                     }
                 }
                 //release event listener
