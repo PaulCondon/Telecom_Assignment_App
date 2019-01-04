@@ -40,7 +40,7 @@ public class BluetoothGPSService extends Service implements LocationListener {
     private FirebaseDatabase database;
     private DatabaseReference dbRef;
     private LocationData newLocation;
-    private int fifteenMinutes = 9000;
+    private int fifteenMinutes = 900000;
     private int numDevices;
     private ArrayList<String> deviceList;
     private ArrayList<String> devicesInCurrLocation;
