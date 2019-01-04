@@ -96,11 +96,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     //get location from database
                     LocationData loc = locSnapshot.getValue(LocationData.class);
                     if (loc != null) {
-                        //
+                        //add marker to the map
                         mMap.addMarker(new MarkerOptions()
                                 .position(new LatLng(loc.latitude, loc.longitude))
+                                //give marker a title of the number of devices at that location
                                 .title("No. Bluetooth Devices: "+loc.getNumBluetoothDevices()));
-
+                        //get the most recent location coordinates
                         long recordedTime  = Long.parseLong(locSnapshot.getKey());
                         if (recordedTime > max) {
                             max = recordedTime;
@@ -112,7 +113,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                 }
                 Log.i("MyTag", "camera:" + lastLocationLat +", "+ lastLocationLong);
-
+                //center the map on the most recent marker
                 CameraUpdate center =
                         CameraUpdateFactory.newLatLng(new LatLng(lastLocationLat,lastLocationLong));
                 CameraUpdate zoom = CameraUpdateFactory.zoomTo(8);

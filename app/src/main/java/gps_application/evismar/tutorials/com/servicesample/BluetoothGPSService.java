@@ -181,9 +181,10 @@ public class BluetoothGPSService extends Service implements LocationListener {
                 list.clear();
                 //loop through all values
                 for (DataSnapshot reference : dataSnapshot.getChildren()) {
-                    String device = dataSnapshot.getValue(String.class);
+                    String device = dataSnapshot.getValue().toString();
                     // add to list if value isn't null
                     if (device != null){
+                        device = device.replaceAll("\\[", "").replaceAll("\\]","");
                         list.add(device);
                         //Log.e(TAG, "Known Device: " + device);
                     }

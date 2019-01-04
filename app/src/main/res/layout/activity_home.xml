@@ -1,45 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:id="@+id/LinearLayout1"
-android:layout_margin="10dp"
-android:orientation="vertical"
-tools:context=".Home">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/LinearLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/coloourGrey"
+    android:label="@string/title_activity_home"
+    tools:context=".Home">
+
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:orientation="vertical"
-        android:layout_weight="1"
-        android:layout_marginTop="10dp">
-
-        <Button
-            android:id="@+id/buttonDevicesMap"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="35dp"
-            android:text="Devices Map"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:orientation="vertical"
-        android:layout_weight="1"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp">
+        android:layout_marginBottom="10dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-        <Button
-            android:id="@+id/buttonDevicesList"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+        <ImageButton
+            android:id="@+id/buttonDevicesMap"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:textSize="35dp"
-            android:text="Devices List"/>
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/googlemaps" />
+
+        <ImageButton
+            android:id="@+id/buttonDevicesList"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/bluetooth" />
     </LinearLayout>
 </LinearLayout>
